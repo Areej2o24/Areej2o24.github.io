@@ -109,8 +109,8 @@ input[type=range]{width:100%;accent-color:var(--g)}
       <div class="f"><label for="code">كود الخصم</label><input type="text" id="code" value="SAVE20" dir="ltr"></div>
       <div class="f"><label for="store">اسم المتجر</label><input type="text" id="store" value="اسم المتجر"></div>
     </div>
-    <div class="f" hidden><label for="badge">الشارة الجانبية <small>(اختياري)</small></label><input type="text" id="badge" value="">
-      <div class="chips"><button type="button" data-b="شحن مجاني">شحن مجاني</button><button type="button" data-b="خصم 15%">خصم %</button><button type="button" data-b="">بدون</button></div>
+    <div class="f"><label for="badge">ستيكر على التصميم <small>(اختياري، مجاني 🆕)</small></label><input type="text" id="badge" value="" placeholder="اكتب نصك أو اختر من تحت">
+      <div class="chips"><button type="button" data-b="عرض حصري 🔥">عرض حصري 🔥</button><button type="button" data-b="لفترة محدودة">لفترة محدودة</button><button type="button" data-b="الأكثر مبيعاً">الأكثر مبيعاً</button><button type="button" data-b="شحن مجاني">شحن مجاني</button><button type="button" data-b="خصم يصل 50%">خصم يصل %</button><button type="button" data-b="">بدون</button></div>
     </div>
     <div class="f" hidden><label for="price">السعر <small>(اختياري، بالريال)</small></label><input type="text" id="price" value="" dir="ltr" placeholder="مثلاً 82.8"></div>
     <div class="f"><label>شكل الصورة</label>
@@ -126,6 +126,12 @@ input[type=range]{width:100%;accent-color:var(--g)}
         <button type="button" class="tp" data-t="clean" aria-pressed="true">نظيف</button>
         <button type="button" class="tp" data-t="bold" aria-pressed="false">جريء ⭐</button>
         <button type="button" class="tp" data-t="split" aria-pressed="false">مقسوم ⭐</button>
+      </div>
+    </div>
+    <div class="f"><label>قوالب المواسم <small>(مجانية 🆕)</small></label>
+      <div class="seg" role="group" aria-label="قوالب المواسم">
+        <button type="button" class="tp" data-t="white" aria-pressed="false">الجمعة البيضاء</button>
+        <button type="button" class="tp" data-t="1111" aria-pressed="false">11.11</button>
       </div>
     </div>
     <div class="f"><label>المقاس</label>
@@ -248,13 +254,18 @@ function ticket(cx,cy,w,h,bg,line,notchBg,label,code,labCol,codeCol,k){
   ctx.textAlign='center';ctx.fillStyle=labCol;ctx.font=`700 ${34*k}px ${F}`;ctx.fillText(label,cx,cy+h*.33);
   ctx.fillStyle=codeCol;ctx.font=`800 ${104*k}px ${F}`;ctx.direction='ltr';ctx.fillText(code,cx,cy+h*.8);ctx.direction='rtl'}
 
+function sticker(cx,cy,r,text,p){if(!text||p<=0)return;ctx.save();ctx.globalAlpha=Math.min(1,p*1.2);ctx.translate(cx,cy);ctx.rotate(-.18);const s=.6+.4*p;ctx.scale(s,s);
+  ctx.shadowColor='rgba(0,0,0,.25)';ctx.shadowBlur=18;ctx.shadowOffsetY=8;ctx.beginPath();const n=22;for(let i=0;i<n*2;i++){const a=i*Math.PI/n,rr=i%2?r*.86:r;ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}ctx.closePath();ctx.fillStyle='#FFD23F';ctx.fill();
+  ctx.shadowColor='transparent';ctx.lineWidth=5;ctx.strokeStyle='#FFFFFF';ctx.stroke();
+  ctx.fillStyle='#2E2219';ctx.textAlign='center';ctx.direction='rtl';let fs=r*.36;let L;do{L=lines(text,r*1.35,`800 ${fs}px ${F}`);fs-=2}while(L.some(l=>ctx.measureText(l).width>r*1.4)&&fs>14);
+  ctx.font=`800 ${fs+2}px ${F}`;const lh=(fs+2)*1.12;L.forEach((l,i)=>ctx.fillText(l,0,(i-(L.length-1)/2)*lh+(fs+2)*.36));ctx.restore()}
 function draw(t=null){
   const story=size==='story',W=1080,H=story?1920:1350;if(cv.height!==H)cv.height=H;const k=story?1.08:1;
   const b=bcfg($('brand').value);
   const v={name:$('name').value.trim()||'اسم المنتج',tag:$('tag').value.trim(),code:($('code').value.trim()||'CODE').toUpperCase(),store:$('store').value.trim(),url:b.url};
   ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.direction='rtl';ctx.globalAlpha=1;ctx.textBaseline='alphabetic';
   ctx.font=`800 ${104*k}px ${F}`;const codeW=Math.max(ctx.measureText(v.code).width+170,520);
-  const top=story?200:70, bot=story?260:60;
+  const top=story?200:70, bot=story?260:60;let stk=null;
   if(tpl==='clean'){
     ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,W,H);
     const gr=ctx.createLinearGradient(0,0,0,H);gr.addColorStop(0,C.gl+'00');gr.addColorStop(1,C.gl+'66');ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
@@ -268,7 +279,7 @@ function draw(t=null){
     ctx.globalAlpha=1;
     const tH=200*k,tY=H-bot-tH-(v.store?70:0);const pT=y+(story?70:40),pB=tY-(story?60:40);
     p=A(t,.8,.8);const R=Math.min(W*.4,(pB-pT)*.52);ctx.globalAlpha=p;ctx.fillStyle=C.gl;ctx.beginPath();ctx.arc(W/2,(pT+pB)/2,R*(.9+.1*p),0,7);ctx.fill();ctx.globalAlpha=1;
-    product(140,pT,W-280,pB-pT,p);
+    product(140,pT,W-280,pB-pT,p);stk=[W/2-R*.82,(pT+pB)/2-R*.62];
     p=A(t,2);ctx.globalAlpha=p;ticket(W/2,tY+(1-p)*30,codeW,tH,'#FFFFFF',C.g,'#FFFFFF','كود الخصم',v.code,C.mut,C.gd,k);
     ctx.save();ctx.globalAlpha=p*.9;ctx.strokeStyle=C.gl;ctx.lineWidth=2;rrect(W/2-codeW/2,tY+(1-p)*30,codeW,tH,22);ctx.stroke();ctx.restore();
     if(v.store){p=A(t,2.5);ctx.globalAlpha=p;ctx.fillStyle=C.ink;ctx.font=`700 ${40*k}px ${F}`;ctx.textAlign='center';ctx.fillText('من '+v.store,W/2,tY+tH+60)}
@@ -283,17 +294,53 @@ function draw(t=null){
     ctx.globalAlpha=1;
     const tH=190*k,tY=H-bot-tH-(story?90:70);const cT=y+(story?60:40),cB=tY-(story?60:36);
     p=A(t,.8,.8);ctx.globalAlpha=p;ctx.save();ctx.shadowColor='rgba(0,0,0,.25)';ctx.shadowBlur=50;ctx.shadowOffsetY=20;ctx.fillStyle='#FFFFFF';rrect(110,cT+(1-p)*30,W-220,cB-cT,48);ctx.fill();ctx.restore();ctx.globalAlpha=1;
-    product(160,cT+40,W-320,cB-cT-80,p,true);
+    product(160,cT+40,W-320,cB-cT-80,p,true);stk=[190,cT+30];
     p=A(t,2);ctx.globalAlpha=p;ticket(W/2,tY+(1-p)*30,codeW,tH,'#FFFFFF',C.g,C.g,'كود الخصم',v.code,C.mut,C.gd,k);
     ctx.textAlign='center';ctx.fillStyle='#FFFFFF';ctx.font=`700 ${36*k}px ${F}`;p=A(t,2.5);ctx.globalAlpha=p;
     ctx.fillText(v.store?`${v.store}  ·  ${v.url}`:v.url,W/2,tY+tH+66);
+  }
+  else if(tpl==='white'){ // الجمعة البيضاء
+    const BG='#141110';ctx.fillStyle=BG;ctx.fillRect(0,0,W,H);
+    const gl=ctx.createRadialGradient(W*.85,H*.1,20,W*.85,H*.1,W*.9);gl.addColorStop(0,C.g+'55');gl.addColorStop(1,C.g+'00');ctx.fillStyle=gl;ctx.fillRect(0,0,W,H);
+    ctx.save();ctx.strokeStyle='rgba(255,255,255,.06)';ctx.lineWidth=2;for(let i=1;i<7;i++){ctx.beginPath();ctx.arc(W*.85,H*.1,i*150,0,7);ctx.stroke()}ctx.restore();
+    brandMark(W-70,top,260,72,'right','#FFFFFF');
+    ctx.font=`700 ${28*k}px ${F}`;ctx.direction='ltr';const uw=ctx.measureText(v.url).width+44;ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=2;rrect(70,top+12,uw,52,26);ctx.stroke();ctx.fillStyle='#FFFFFF';ctx.textAlign='center';ctx.fillText(v.url,70+uw/2,top+48);ctx.direction='rtl';
+    let y=top+(story?250:200);let p=A(t,.1);ctx.globalAlpha=p;
+    const hf=`800 ${118*k}px ${F}`;ctx.font=hf;const w1=ctx.measureText('الجمعة ').width,w2=ctx.measureText('البيضاء').width;const xr=W/2+(w1+w2)/2;
+    ctx.textAlign='right';ctx.fillStyle='#FFFFFF';ctx.fillText('الجمعة ',xr,y+(1-p)*30);ctx.fillStyle=C.g;ctx.fillText('البيضاء',xr-w1,y+(1-p)*30);
+    p=A(t,.5);ctx.globalAlpha=p;const tf=`700 ${(v.name.length>20?50:58)*k}px ${F}`;const L=lines(v.name,W-160,tf);ctx.font=tf;ctx.fillStyle='rgba(255,255,255,.92)';ctx.textAlign='center';
+    L.forEach((l,i)=>ctx.fillText(l,W/2,y+(story?110:96)+i*66*k));y+=(story?110:96)+(L.length-1)*66*k;
+    if(v.tag){ctx.fillStyle='rgba(255,255,255,.6)';ctx.font=`500 ${38*k}px ${F}`;ctx.fillText(v.tag,W/2,y+(story?64:56));y+=story?64:56}
+    ctx.globalAlpha=1;
+    const tH=190*k,tY=H-bot-tH-(story?90:70);const cT=y+(story?60:40),cB=tY-(story?60:36);
+    p=A(t,.8,.8);ctx.globalAlpha=p;ctx.save();ctx.shadowColor=C.g+'66';ctx.shadowBlur=60;ctx.fillStyle='#FFFFFF';rrect(120,cT+(1-p)*30,W-240,cB-cT,44);ctx.fill();ctx.restore();ctx.globalAlpha=1;
+    product(170,cT+36,W-340,cB-cT-72,p,true);stk=[195,cT+28];
+    p=A(t,2);ctx.globalAlpha=p;ticket(W/2,tY+(1-p)*30,codeW,tH,'#FFFFFF',C.g,BG,'كود الخصم',v.code,C.mut,C.gd,k);
+    p=A(t,2.5);ctx.globalAlpha=p;ctx.textAlign='center';ctx.fillStyle='rgba(255,255,255,.7)';ctx.font=`700 ${34*k}px ${F}`;if(v.store)ctx.fillText('من '+v.store,W/2,tY+tH+64);
+  }
+  else if(tpl==='1111'){ // 11.11
+    ctx.fillStyle=C.g;ctx.fillRect(0,0,W,H);
+    ctx.save();ctx.direction='ltr';ctx.textAlign='center';ctx.font=`800 ${420*k}px ${F}`;ctx.strokeStyle='rgba(255,255,255,.14)';ctx.lineWidth=4;ctx.strokeText('11.11',W/2,H*.62);ctx.restore();
+    {const r=rnd(11);ctx.save();for(let i=0;i<46;i++){const x=r()*W,yy=r()*H*.5,s=8+r()*14;ctx.globalAlpha=.35+r()*.4;ctx.fillStyle=i%3?'#FFFFFF':'#FFD23F';ctx.translate(x,yy);ctx.rotate(r()*3);ctx.fillRect(-s/2,-s/4,s,s/2);ctx.setTransform(1,0,0,1,0,0)}ctx.restore()}
+    brandMark(W/2,top,260,72,'center','#FFFFFF');
+    let y=top+(story?300:250);let p=A(t,.1);ctx.globalAlpha=p;
+    ctx.save();ctx.direction='ltr';ctx.textAlign='center';ctx.font=`800 ${170*k}px ${F}`;ctx.fillStyle='#FFFFFF';ctx.shadowColor='rgba(0,0,0,.18)';ctx.shadowOffsetY=8;ctx.shadowBlur=0;ctx.fillText('11.11',W/2,y+(1-p)*30);ctx.restore();
+    ctx.fillStyle='#FFD23F';ctx.font=`800 ${44*k}px ${F}`;ctx.textAlign='center';ctx.fillText('مهرجان التخفيضات',W/2,y+(story?78:68));y+=story?78:68;
+    p=A(t,.5);ctx.globalAlpha=p;const tf=`700 ${(v.name.length>20?50:58)*k}px ${F}`;const L=lines(v.name,W-160,tf);ctx.font=tf;ctx.fillStyle='#FFFFFF';
+    L.forEach((l,i)=>ctx.fillText(l,W/2,y+(story?90:76)+i*66*k));y+=(story?90:76)+(L.length-1)*66*k;
+    ctx.globalAlpha=1;
+    const tH=190*k,tY=H-bot-tH-(story?90:70);const pT=y+(story?50:24),pB=tY-(story?50:30);
+    p=A(t,.8,.8);const R=Math.min(W*.36,(pB-pT)*.52);ctx.globalAlpha=p*.9;ctx.fillStyle='rgba(255,255,255,.22)';ctx.beginPath();ctx.arc(W/2,(pT+pB)/2,R*(.9+.1*p),0,7);ctx.fill();ctx.globalAlpha=1;
+    product(170,pT,W-340,pB-pT,p,true);stk=[W/2-R*.85,(pT+pB)/2-R*.6];
+    p=A(t,2);ctx.globalAlpha=p;ticket(W/2,tY+(1-p)*30,codeW,tH,'#FFFFFF',C.g,C.g,'كود الخصم',v.code,C.mut,C.gd,k);
+    p=A(t,2.5);ctx.globalAlpha=p;ctx.textAlign='center';ctx.fillStyle='rgba(255,255,255,.9)';ctx.font=`700 ${34*k}px ${F}`;ctx.fillText(v.store?`${v.store}  ·  ${v.url}`:v.url,W/2,tY+tH+64);
   }
   else{ // split
     const split=story?H*.58:H*.56;
     ctx.fillStyle=C.gl;ctx.fillRect(0,0,W,H);
     ctx.save();ctx.globalAlpha=.5;ctx.fillStyle='#FFFFFF';ctx.beginPath();ctx.arc(W*.78,split*.42,split*.42,0,7);ctx.fill();ctx.restore();
     brandMark(W-70,top,260,72,'right',C.gd);
-    let p=A(t,.3,.8);product(120,top+(story?120:100),W-240,split-top-(story?140:120)-30,p);
+    let p=A(t,.3,.8);product(120,top+(story?120:100),W-240,split-top-(story?140:120)-30,p);stk=[200,top+(story?300:240)];
     // panel
     const pr=60;ctx.fillStyle=C.gd;rrect(0,split,W,H-split+pr,pr);ctx.fill();
     let y=split+(story?140:118);p=A(t,.9);ctx.globalAlpha=p;const tf=`800 ${(v.name.length>16?76:90)*k}px ${F}`;const L=lines(v.name,W-140,tf);
@@ -306,6 +353,7 @@ function draw(t=null){
     p=A(t,2.5);ctx.globalAlpha=p;const fy=Math.min(H-bot-10,by2+bh+(story?110:78));ctx.font=`700 ${34*k}px ${F}`;ctx.fillStyle='rgba(255,255,255,.85)';
     ctx.textAlign='right';if(v.store)ctx.fillText(v.store,W-70,fy);ctx.textAlign='left';ctx.direction='ltr';ctx.fillText(v.url,70,fy);ctx.direction='rtl';
   }
+  if(stk)sticker(stk[0],stk[1],98*k,$('badge').value.trim(),A(t,2.8,.5));
   ctx.save();ctx.globalAlpha=.85;ctx.direction='rtl';ctx.textAlign='center';ctx.font=`700 26px ${F}`;ctx.fillStyle='rgba(46,34,25,.55)';ctx.fillText('صُمّم بـ استوديو عروض الأكواد',W/2,H-22);ctx.restore();
   ctx.restore();
 }
@@ -380,9 +428,10 @@ function qGet(){try{const q=JSON.parse(localStorage.getItem('cs_q')||'null');if(
 function qUse(){try{localStorage.setItem('cs_q',JSON.stringify({d:qToday(),n:qGet()+1}))}catch(e){}qShow()}
 function qLeft(){return Math.max(0,QMAX-qGet())}
 function qShow(){const el=$('quotaTxt');if(el)el.textContent=qLeft()?`باقي لك اليوم: ${qLeft()} من ${QMAX}`:'خلصت محاولات اليوم، ترجع بكرة ✨'}
-function isPremium(reel){return reel||tpl!=='clean'||size==='story'}
+const FREE_T=['clean','white','1111'];
+function isPremium(reel){return reel||!FREE_T.includes(tpl)||size==='story'}
 function qOut(){$('note').classList.add('err');$('note').innerHTML='خلصت محاولاتك المجانية لليوم ('+QMAX+'). ترجع لك بكرة، أو <a href="https://areejstrategies.wordpress.com/coupon-studio/" target="_blank" rel="noopener">خذ النسخة الكاملة بلا حدود</a>.'}
-document.querySelectorAll('.tp').forEach(bt=>bt.onclick=()=>{tpl=bt.dataset.t;if(tpl!=='clean')note('⭐ ميزة مدفوعة: '+(qLeft()?`باقي لك اليوم ${qLeft()} من ${QMAX}`:'خلصت محاولات اليوم'));document.querySelectorAll('.tp').forEach(x=>x.setAttribute('aria-pressed',x===bt));try{localStorage.setItem('cs_tpl',tpl)}catch(e){}draw()});
+document.querySelectorAll('.tp').forEach(bt=>bt.onclick=()=>{tpl=bt.dataset.t;if(!FREE_T.includes(tpl))note('⭐ ميزة مدفوعة: '+(qLeft()?`باقي لك اليوم ${qLeft()} من ${QMAX}`:'خلصت محاولات اليوم'));document.querySelectorAll('.tp').forEach(x=>x.setAttribute('aria-pressed',x===bt));try{localStorage.setItem('cs_tpl',tpl)}catch(e){}draw()});
 try{const tt=localStorage.getItem('cs_tpl');if(false){tpl=tt;document.querySelectorAll('.tp').forEach(x=>x.setAttribute('aria-pressed',x.dataset.t===tt))}}catch(e){}
 function setSize(s){size=s;$('szPost').setAttribute('aria-pressed',s==='post');$('szStory').setAttribute('aria-pressed',s==='story');
   $('cap').textContent=s==='post'?'معاينة بالمقاس الحقيقي 1080×1350':'معاينة بالمقاس الحقيقي 1080×1920';draw()}
